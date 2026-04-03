@@ -149,12 +149,16 @@ export async function resolveUserId(userId: number) {
 // Bans
 // --------------------------------------------------
 
-export type BanData = {
+export type BanOptions = {
 	active: boolean,
 	duration?: string,
 	privateReason: string,
 	displayReason: string,
 	excludeAltAccounts?: boolean,
+}
+
+export type BanData = BanOptions & {
+	startTime: string,
 }
 
 export async function getBan(universeId: number, userId: number) {
@@ -166,7 +170,7 @@ export async function getBan(universeId: number, userId: number) {
 	return response.gameJoinRestriction ?? null
 }
 
-export async function updateBan(universeId: number, userId: number, ban: BanData) {
+export async function updateBan(universeId: number, userId: number, ban: BanOptions) {
 	await request({
 		method: "PATCH",
 		path: `/cloud/v2/universes/${universeId}/user-restrictions/${userId}`,

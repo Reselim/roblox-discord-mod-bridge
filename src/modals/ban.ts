@@ -6,10 +6,41 @@ import * as banContainer from "../containers/ban.ts"
 
 export const id = "ban"
 
+function formatDuration(time: number) {
+	const days = Math.floor(time / (24*60*60))
+	const hours = Math.floor(time / (60*60)) % 24
+	const minutes = Math.floor(time / 60) % 60
+	const seconds = time % 60
+
+	const text = []
+	if (seconds > 0) text.push(seconds + "s")
+	if (minutes > 0) text.push(minutes + "m")
+	if (hours > 0) text.push(hours + "h")
+	if (days > 0) text.push(days + "d")
+
+	return text.join(" ")
+}
+
 export function build(data: roblox.UserData, ban: roblox.BanData | null) {
 	const modal = new ModalBuilder()
 		.setCustomId(`${id}(${data.id})`)
 		.setTitle(`Ban ${data.name}`)
+
+	let reason = ""
+	let notes = ""
+	let duration = ""
+
+	if (ban) {
+		reason = ban.displayReason
+		notes = parseNotes(ban.privateReason).notes
+		
+		if (ban.duration) {
+			const elapsedTime = Math.floor((Date.now() - Date.parse(ban.startTime)) / 1000)
+			const durationTime = parseDuration(ban.duration, "s")!
+
+			duration = formatDuration(durationTime - elapsedTime)
+		}
+	}
 
 	modal.addLabelComponents(
 		new LabelBuilder()
@@ -19,7 +50,7 @@ export function build(data: roblox.UserData, ban: roblox.BanData | null) {
 					.setCustomId("reason")
 					.setRequired(true)
 					.setMaxLength(400)
-					.setValue(ban?.displayReason ?? "")
+					.setValue(reason)
 					.setStyle(TextInputStyle.Short)
 			),
 		new LabelBuilder()
@@ -29,7 +60,7 @@ export function build(data: roblox.UserData, ban: roblox.BanData | null) {
 					.setCustomId("notes")
 					.setRequired(false)
 					.setMaxLength(1000)
-					.setValue(ban ? parseNotes(ban.privateReason).notes : "") // TODO: strip data
+					.setValue(notes)
 					.setStyle(TextInputStyle.Paragraph)
 			),
 		new LabelBuilder()
@@ -39,7 +70,7 @@ export function build(data: roblox.UserData, ban: roblox.BanData | null) {
 					.setCustomId("duration")
 					.setRequired(false)
 					.setPlaceholder("Permanent")
-					.setValue(ban?.duration ?? "")
+					.setValue(duration)
 					.setStyle(TextInputStyle.Short)
 			)
 	)
@@ -68,7 +99,7 @@ export async function execute(this: Client, interaction: ModalSubmitInteraction,
 		displayReason: reason,
 		privateReason: `[Moderator ${interaction.user.id}] ${notes}`,
 		excludeAltAccounts: true,
-	} as roblox.BanData
+	} as roblox.BanOptions
 	
 	const durationTime = parseDuration(duration, "s")
 	if (durationTime) ban.duration = durationTime + "s"
@@ -80,7 +111,7 @@ export async function execute(this: Client, interaction: ModalSubmitInteraction,
 		throw `Failed to ban **${userData.name}**. Please try again later.`
 	}
 
-	const container = banContainer.build(ban)
+	const container = banContainer.build({ ...ban, startTime: new Date().toISOString() })
 	await Promise.all([
 		interaction.reply({
 			components: [

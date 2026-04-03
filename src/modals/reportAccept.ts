@@ -74,7 +74,7 @@ export async function execute(this: Client, interaction: ModalMessageModalSubmit
 		displayReason: reason,
 		privateReason: `[Moderator ${interaction.user.id}] [Report ${env.DISCORD_CHANNEL_LOG}/${logMessage.id}] ${notes}`,
 		excludeAltAccounts: true,
-	} as roblox.BanData
+	} as roblox.BanOptions
 	
 	const durationTime = parseDuration(duration, "s")
 	if (durationTime) ban.duration = durationTime + "s"
@@ -90,7 +90,7 @@ export async function execute(this: Client, interaction: ModalMessageModalSubmit
 		logMessage.edit({
 			components: [
 				new TextDisplayBuilder().setContent(`<@${interaction.user.id}> accepted a report on **${target.name}** (${target.id})`),
-				banContainer.build(ban),
+				banContainer.build({ ...ban, startTime: new Date().toISOString() }),
 				reportContainer.strip(interaction.message, 0x008545),
 			],
 			flags: MessageFlags.IsComponentsV2,
