@@ -39,24 +39,25 @@ export async function execute(this: Client, interaction: ModalMessageModalSubmit
 	const targetId = parseInt(context[1])
 
 	const target = (await roblox.resolveUserId(targetId))!
-	
-	await logsChannel.send({
-		components: [
-			new TextDisplayBuilder().setContent(`<@${interaction.user.id}> declined a report on **${target.name}** (${target.id})`),
-			new TextDisplayBuilder().setContent(quote(reason)),
-			reportContainer.strip(interaction.message, 0xD22D39),
-		],
-		flags: [
-			MessageFlags.IsComponentsV2,
-			MessageFlags.SuppressNotifications,
-		],
-	})
-	await interaction.message.delete()
 
-	await interaction.reply({
-		content: "Report declined.",
-		flags: MessageFlags.Ephemeral,
-	})
+	await Promise.all([
+		logsChannel.send({
+			components: [
+				new TextDisplayBuilder().setContent(`<@${interaction.user.id}> declined a report on **${target.name}** (${target.id})`),
+				new TextDisplayBuilder().setContent(quote(reason)),
+				reportContainer.strip(interaction.message, 0xD22D39),
+			],
+			flags: [
+				MessageFlags.IsComponentsV2,
+				MessageFlags.SuppressNotifications,
+			],
+		}),
+		interaction.message.delete(),
+		interaction.reply({
+			content: "Report declined.",
+			flags: MessageFlags.Ephemeral,
+		}),
+	])
 
 	if (notify) {
 		const source = await this.users.fetch(sourceId)

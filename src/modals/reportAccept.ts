@@ -86,20 +86,21 @@ export async function execute(this: Client, interaction: ModalMessageModalSubmit
 		throw "Failed to ban Roblox user. Please try again later."
 	}
 
-	await logMessage.edit({
-		components: [
-			new TextDisplayBuilder().setContent(`<@${interaction.user.id}> accepted a report on **${target.name}** (${target.id})`),
-			banContainer.build(ban),
-			reportContainer.strip(interaction.message, 0x008545),
-		],
-		flags: MessageFlags.IsComponentsV2,
-	})
-	await interaction.message.delete()
-
-	await interaction.reply({
-		content: "Report accepted.",
-		flags: MessageFlags.Ephemeral,
-	})
+	await Promise.all([
+		logMessage.edit({
+			components: [
+				new TextDisplayBuilder().setContent(`<@${interaction.user.id}> accepted a report on **${target.name}** (${target.id})`),
+				banContainer.build(ban),
+				reportContainer.strip(interaction.message, 0x008545),
+			],
+			flags: MessageFlags.IsComponentsV2,
+		}),
+		interaction.message.delete(),
+		interaction.reply({
+			content: "Report accepted.",
+			flags: MessageFlags.Ephemeral,
+		}),
+	])
 
 	if (notify) {
 		const source = await this.users.fetch(sourceId)
