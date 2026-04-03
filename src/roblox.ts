@@ -81,9 +81,8 @@ export async function getUserThumbnail(userId: number, size?: number, shape?: "S
 		method: "GET",
 		path: `/cloud/v2/users/${userId}:generateThumbnail`,
 		query: {
-			user_id: userId,
 			size: size ?? 420,
-			shape: shape ?? "CIRCLE",
+			shape: shape ?? "ROUND",
 		},
 	})
 
