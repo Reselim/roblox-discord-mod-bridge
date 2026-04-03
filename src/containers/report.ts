@@ -31,8 +31,14 @@ export async function build(source: User, target: roblox.UserData, options: {
 
 	const profileTextComponents: TextDisplayBuilder[] = [
 		new TextDisplayBuilder().setContent(`### [${target.displayName} (${target.name})](https://www.roblox.com/users/${target.id}/profile)`),
-		new TextDisplayBuilder().setContent(profile ? (profile.about ?? "*No bio yet*") : "*Failed to fetch profile*")
+		
 	]
+	if (profile) {
+		profileTextComponents.push(new TextDisplayBuilder().setContent(`-# Created <t:${Math.floor(Date.parse(profile.createTime) / 1000)}:R> · ${profile.locale}`))
+		profileTextComponents.push(new TextDisplayBuilder().setContent(profile.about ?? "*No bio yet*"))
+	} else {
+		profileTextComponents.push(new TextDisplayBuilder().setContent("*Failed to fetch profile*"))
+	}
 	if (thumbnail) {
 		container.addSectionComponents(
 			new SectionBuilder()

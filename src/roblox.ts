@@ -56,6 +56,7 @@ export type ProfileData = {
 	id: number,
 	name: string,
 	displayName: string,
+	createTime: string,
 	about: string,
 	locale: string,
 	premium: boolean,
