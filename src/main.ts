@@ -1,4 +1,4 @@
-import { ButtonInteraction, Client, Collection, ChatInputCommandInteraction, Events, ModalSubmitInteraction, REST, Routes, SlashCommandBuilder, GatewayIntentBits } from "discord.js"
+import { ButtonInteraction, Client, Collection, ChatInputCommandInteraction, Events, ModalSubmitInteraction, REST, Routes, SlashCommandBuilder, GatewayIntentBits, type Interaction, type RepliableInteraction, MessageFlags, type InteractionReplyOptions } from "discord.js"
 import path from "node:path"
 import fs from "node:fs/promises"
 import { log, env } from "./util.ts"
@@ -61,15 +61,36 @@ roblox.introspect().then(data => {
 
 interface Command extends Module {
 	build(): SlashCommandBuilder,
-	execute(interaction: ChatInputCommandInteraction): Promise<void> | void,
+	execute(interaction: ChatInputCommandInteraction): Promise<void>,
 }
 
 interface Button extends Module {
-	execute(interaction: ButtonInteraction, context: string[]): Promise<void> | void,
+	execute(interaction: ButtonInteraction, context: string[]): Promise<void>,
 }
 
 interface Modal extends Module {
-	execute(interaction: ModalSubmitInteraction, context: string[]): Promise<void> | void,
+	execute(interaction: ModalSubmitInteraction, context: string[]): Promise<void>,
+}
+
+async function handleErrors(interaction: RepliableInteraction, callback: () => Promise<void>) {
+	try {
+		await callback()
+	} catch(error) {
+		if (typeof error === "string") {
+			const message = {
+				content: `**Error**: ${error}`,
+				flags: MessageFlags.Ephemeral,
+			} as InteractionReplyOptions
+
+			if (interaction.replied) {
+				interaction.followUp(message)
+			} else {
+				interaction.reply(message)
+			}
+		} else {
+			throw error
+		}
+	}
 }
 
 ;(async () => {
@@ -90,7 +111,7 @@ interface Modal extends Module {
 			const command = commands.get(interaction.commandName)
 			
 			if (command) {
-				command.execute.call(client, interaction)
+				handleErrors(interaction, () => command.execute.call(client, interaction))
 			} else {
 				log.error(`Failed to find command with name ${interaction.commandName}`)
 			}
@@ -98,7 +119,7 @@ interface Modal extends Module {
 			const { id, context } = parseCustomId(interaction.customId)
 			const button = buttons.get(id)
 			if (button) {
-				button.execute.call(client, interaction, context)
+				handleErrors(interaction, () => button.execute.call(client, interaction, context))
 			} else {
 				log.error(`Failed to find button with ID ${id}`)
 			}
@@ -106,7 +127,7 @@ interface Modal extends Module {
 			const { id, context } = parseCustomId(interaction.customId)
 			const modal = modals.get(id)
 			if (modal) {
-				modal.execute.call(client, interaction, context)
+				handleErrors(interaction, () => modal.execute.call(client, interaction, context))
 			} else {
 				log.error(`Failed to find button with ID ${id}`)
 			}

@@ -15,20 +15,14 @@ export function build() {
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const username = interaction.options.getString("username", true)
 	const userData = await roblox.resolveUsername(username)
-	if (!userData) return await interaction.reply({
-		content: `**Error**: Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`,
-		flags: MessageFlags.Ephemeral,
-	})
+	if (!userData) throw `Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`
 
 	let ban
 	try {
 		ban = await roblox.getBan(env.ROBLOX_UNIVERSE_ID, userData.id)
 	} catch(error) {
 		log.warn(error, `Failed to get ban for ${userData.name}`)
-		return await interaction.reply({
-			content: `Unable to retrieve ban for **${userData.name}**. Please try again later.`,
-			flags: MessageFlags.Ephemeral,
-		})
+		throw `Unable to retrieve ban for **${userData.name}**. Please try again later.`
 	}
 
 	if (ban && ban.active) {

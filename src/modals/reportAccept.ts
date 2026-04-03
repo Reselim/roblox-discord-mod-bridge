@@ -83,10 +83,7 @@ export async function execute(this: Client, interaction: ModalMessageModalSubmit
 		await roblox.updateBan(env.ROBLOX_UNIVERSE_ID, targetId, ban)
 	} catch {
 		await logMessage.delete()
-		return await interaction.reply({
-			content: "Failed to ban Roblox user, please try again soon.",
-			flags: MessageFlags.Ephemeral,
-		})
+		throw "Failed to ban Roblox user. Please try again later."
 	}
 
 	await logMessage.edit({

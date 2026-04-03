@@ -15,10 +15,7 @@ export function build() {
 export async function execute(interaction: ChatInputCommandInteraction) {
 	const username = interaction.options.getString("username", true)
 	const userData = await roblox.resolveUsername(username)
-	if (!userData) return await interaction.reply({
-		content: `**Error**: Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`,
-		flags: MessageFlags.Ephemeral,
-	})
+	if (!userData) throw `Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`
 
 	let ban = null
 	try {

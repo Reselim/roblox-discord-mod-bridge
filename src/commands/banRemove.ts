@@ -16,19 +16,13 @@ export async function execute(this: Client, interaction: ChatInputCommandInterac
 
 	const username = interaction.options.getString("username", true)
 	const userData = await roblox.resolveUsername(username)
-	if (!userData) return await interaction.reply({
-		content: `**Error**: Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`,
-		flags: MessageFlags.Ephemeral,
-	})
+	if (!userData) throw `Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`
 
 	try {
 		await roblox.removeBan(env.ROBLOX_UNIVERSE_ID, userData.id)
 	} catch(error) {
 		log.warn(error, `Failed to unban ${userData.name}`)
-		return await interaction.reply({
-			content: `Failed to unban **${userData.name}**. Please try again later.`,
-			flags: MessageFlags.Ephemeral,
-		})
+		throw `Failed to unban **${userData.name}**. Please try again later.`
 	}
 
 	await Promise.all([

@@ -77,10 +77,7 @@ export async function execute(this: Client, interaction: ModalSubmitInteraction,
 		await roblox.updateBan(env.ROBLOX_UNIVERSE_ID, userId, ban)
 	} catch(error) {
 		log.warn(error, `Failed to ban ${userData.name}`)
-		return await interaction.reply({
-			content: `Failed to ban **${userData.name}**. Please try again later.`,
-			flags: MessageFlags.Ephemeral,
-		})
+		throw `Failed to ban **${userData.name}**. Please try again later.`
 	}
 
 	const container = banContainer.build(ban)

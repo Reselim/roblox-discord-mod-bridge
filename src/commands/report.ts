@@ -24,23 +24,14 @@ export async function execute(this: Client, interaction: ChatInputCommandInterac
 	if (evidence.contentType) {
 		const [ type ] = evidence.contentType.split("/")
 		if (type !== "image" && type !== "video") {
-			return await interaction.reply({
-				content: `**Error**: Attachment is not an image or video`,
-				flags: MessageFlags.Ephemeral,
-			})
+			throw "Attachment is not an image or video"
 		}
 	} else {
-		return await interaction.reply({
-			content: `**Error**: Invalid attachment`,
-			flags: MessageFlags.Ephemeral,
-		})
+		throw "Invalid attachment"
 	}
 
 	const targetData = await roblox.resolveUsername(username)
-	if (!targetData) return await interaction.reply({
-		content: `**Error**: Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`,
-		flags: MessageFlags.Ephemeral,
-	})
+	if (!targetData) throw `Couldn't find Roblox user with the username **${username}**. Please ensure you typed the username correctly and try again.`
 
 	reportChannel.send({
 		components: [
