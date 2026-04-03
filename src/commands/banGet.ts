@@ -31,7 +31,7 @@ export async function execute(interaction: ChatInputCommandInteraction) {
 		})
 	}
 
-	if (ban) {
+	if (ban && ban.active) {
 		await interaction.reply({
 			components: [
 				banContainer.build(ban),
