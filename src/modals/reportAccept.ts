@@ -73,7 +73,6 @@ export async function execute(this: Client, interaction: ModalMessageModalSubmit
 		active: true,
 		displayReason: reason,
 		privateReason: `[Moderator ${interaction.user.id}] [Report ${env.DISCORD_CHANNEL_LOG}/${logMessage.id}] ${notes}`,
-		excludeAltAccounts: true,
 	} as roblox.BanOptions
 	
 	const durationTime = parseDuration(duration, "s")

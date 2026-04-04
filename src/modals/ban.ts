@@ -98,7 +98,6 @@ export async function execute(this: Client, interaction: ModalSubmitInteraction,
 		active: true,
 		displayReason: reason,
 		privateReason: `[Moderator ${interaction.user.id}] ${notes}`,
-		excludeAltAccounts: true,
 	} as roblox.BanOptions
 	
 	const durationTime = parseDuration(duration, "s")
